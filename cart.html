@@ -1,0 +1,93 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Корзина</title>
+    <link rel="stylesheet" href="cart.css">
+    <script defer src="cart.js"></script>
+</head>
+<body>
+
+    <!-- Шапка -->
+    <header>
+        <nav>
+            <div class="logo">Аптека Онлайн</div>
+            <ul>
+                <li><a href="index.html">Главная</a></li>
+                <li><a href="catalog.html">Каталог</a></li>
+                <li><a href="profile.html">Профиль</a></li>
+                <li><a href="cart.html">Корзина <span id="cart-count">0</span></a></li>
+                <li><a href="login.html">Войти</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Корзина -->
+    <section class="cart">
+        <h2>Ваша корзина</h2>
+        <div id="cart-items"></div>
+
+        <!-- Адрес доставки и способ оплаты -->
+        <div class="delivery-address">
+            <h3>Адрес доставки</h3>
+            <input type="text" id="delivery-address" placeholder="Введите ваш адрес">
+        </div>
+
+        <div class="payment-method">
+            <h3>Способ оплаты</h3>
+            <select id="payment-method">
+                <option value="visa">Visa</option>
+                <option value="mastercard">MasterCard</option>
+                <option value="paypal">PayPal</option>
+            </select>
+        </div>
+
+        <div class="cart-total">
+            <span>Общая сумма: <span id="total-price">₽0</span></span>
+            <button class="checkout" id="checkout">Оформить заказ</button>
+            <button class="clear-cart" onclick="clearCart()">Очистить корзину</button>
+        </div>
+    </section>
+
+    <script>
+        document.getElementById("checkout").addEventListener("click", function () {
+            const customerName = prompt("Введите ваше имя:");
+            const email = prompt("Введите ваш email:");
+            const phone = prompt("Введите ваш телефон:");
+            const address = document.getElementById("delivery-address").value;
+            const paymentMethod = document.getElementById("payment-method").value;
+            const cart = JSON.parse(localStorage.getItem("cart"));
+            const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+            const orderData = {
+                customer_name: customerName,
+                email: email,
+                phone: phone,
+                address: address,
+                payment_method: paymentMethod,
+                total_amount: totalAmount,
+                items: cart
+            };
+
+            fetch("order.php", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(orderData)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    localStorage.removeItem("cart");
+                    window.location.href = "index.html";
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                });
+        });
+    </script>
+
+</body>
+</html>
